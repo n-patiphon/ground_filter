@@ -204,21 +204,13 @@ void GroundFilter::groundSeparate(const pcl::PointCloud<velodyne_pointcloud::Poi
 				double pair_angle = z_diff/r_diff;
 				//Check if the angle between the current and the previous point is less than a defined maximum_slope
 				//If the angle is less than maximum_slope, add the current point to "Candidate group"
-				//Bug here
 				if (((pair_angle > 0 && pair_angle < limiting_ratio) && z_diff < gap_thres && z0 < clipping_thres - sensor_height) || point_index_size == 0)
-				//if (((pair_angle > 0 && pair_angle < limiting_ratio) && z0 < clipping_thres - sensor_height) || point_index_size == 0)
 				{
 					r_ref = r0;
 					z_ref = z0;
 					point_index[point_index_size] = j;
 					point_index_size++;
 				} else {
-					//if (j == 0)
-					//{
-					//	point_index[point_index_size] = j;
-					//	point_index_size++;
-					//}
-						
 					//If the angle exceeds the maximum slope
 					//Check number of point in "Candidate group", if exceeds the minimum_point threshold
 					//Publish them as ground points
@@ -260,21 +252,11 @@ void GroundFilter::groundSeparate(const pcl::PointCloud<velodyne_pointcloud::Poi
 						}
 						point_index_size = 0;
 					}
+
 					r_ref = r0;
 					z_ref = z0;
 					point_index[point_index_size] = j;
 					point_index_size++;
-/*					if (j == 0)
-					{
-						int index = index_map.at<int>(j,i);
-						point.x = msg->points[index].x;
-						point.y = msg->points[index].y;
-						point.z = msg->points[index].z;
-						point.intensity = msg->points[index].intensity;
-						point.ring = msg->points[index].ring;
-						vertical_points.push_back(point);
-						point_class[j] = VERTICAL;
-					}*/
 				}
   			}
 			//If the highest ray is reached
@@ -319,25 +301,7 @@ void GroundFilter::groundSeparate(const pcl::PointCloud<velodyne_pointcloud::Poi
 						}
 						point_index_size = 0;
 					}
-				} /*else {
-					if (index_map.at<int>(j,i) > -1)
-					{
-						int index = index_map.at<int>(j,i);
-						point.z = msg->points[index].z;
-						if (point.z > clipping_thres - sensor_height)
-						{
-							point.x = msg->points[index].x;
-							point.y = msg->points[index].y;
-							point.intensity = msg->points[index].intensity;
-							point.ring = msg->points[index].ring;
-							vertical_points.push_back(point);
-							point_class[j] = VERTICAL;
-						} else {
-							unknown_index[unknown_index_size] = index;
-							unknown_index_size++;
-						}
-					}
-				}*/
+				} 
 				//Lastly, the remaining unknown points are checked using different approach
 				//Check if the radial distance between two consecutive points is less than 
 				//point_distance threshold, if so classify them as vertical
