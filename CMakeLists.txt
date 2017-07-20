@@ -19,7 +19,7 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-add_executable(${PROJECT_NAME}_node src/ground_filter_Timimg.cpp)
+add_executable(${PROJECT_NAME}_node src/ground_filter_Timing.cpp)
 
 target_link_libraries(${PROJECT_NAME}_node
    ${catkin_LIBRARIES}
