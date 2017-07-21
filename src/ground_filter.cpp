@@ -53,6 +53,10 @@ private:
 	Label 		class_label[64];
 	double 		optimal_radius[64];
 
+
+	int		original_point;
+	int		remaining_point;
+
 	boost::chrono::high_resolution_clock::time_point t1;
 	boost::chrono::high_resolution_clock::time_point t2;
 	boost::chrono::nanoseconds elap_time;
@@ -148,6 +152,8 @@ void GroundFilter::publishPoint(const pcl::PointCloud<velodyne_pointcloud::Point
 		point.intensity = msg->points[index[i]].intensity;
 		point.ring = msg->points[index[i]].ring;
 		topic.push_back(point);
+
+		remaining_point++;
 	}
 	index_size = 0;	
 
@@ -164,6 +170,9 @@ void GroundFilter::groundSeparate(const pcl::PointCloud<velodyne_pointcloud::Poi
         horizontal_res = int(msg->points.size() / vertical_res);
         initDepthMap(horizontal_res);
 
+	original_point = msg->points.size();
+	remaining_point = 0;
+	
 	//Convert coordinate of each point from Cartesian to Spherical (XYZ -> DepthMap)
         for (int i = 0; i < msg->points.size(); i++)
         {
@@ -227,6 +236,8 @@ void GroundFilter::groundSeparate(const pcl::PointCloud<velodyne_pointcloud::Poi
 								point.ring = msg->points[index].ring;
 								ground_points.push_back(point);
 								point_class[point_index[m]] = GROUND;
+
+								remaining_point++;
 						}
 						point_index_size = 0;
 					//If the number of point in "Candidate group" is less than the threshold, continue the calculation
@@ -244,6 +255,9 @@ void GroundFilter::groundSeparate(const pcl::PointCloud<velodyne_pointcloud::Poi
 								point.ring = msg->points[index].ring;
 								vertical_points.push_back(point);
 								point_class[point_index[m]] = VERTICAL;
+
+
+								remaining_point++;
 							//Mark the remaining points as Unknown points for further calculation
 							} else {
 								unknown_index[unknown_index_size] = index;
@@ -279,6 +293,8 @@ void GroundFilter::groundSeparate(const pcl::PointCloud<velodyne_pointcloud::Poi
 								point.ring = msg->points[index].ring;
 								ground_points.push_back(point);
 								point_class[point_index[m]] = GROUND;
+
+								remaining_point++;
 						}
 						point_index_size = 0;
 					} else {
@@ -294,6 +310,8 @@ void GroundFilter::groundSeparate(const pcl::PointCloud<velodyne_pointcloud::Poi
 								point.ring = msg->points[index].ring;
 								vertical_points.push_back(point);
 								point_class[point_index[m]] = VERTICAL;
+
+								remaining_point++;
 							} else {
 								unknown_index[unknown_index_size] = index;
 								unknown_index_size++;
@@ -383,9 +401,8 @@ void GroundFilter::velodyneCallback(const pcl::PointCloud<velodyne_pointcloud::P
 
 	t2 = boost::chrono::high_resolution_clock::now();
         elap_time = (boost::chrono::duration_cast<boost::chrono::nanoseconds>(t2-t1));
-        std::cout << "Computational time for each frame is " << elap_time <<std::endl;
-
-
+        //std::cout << "Computational time for each frame is " << elap_time <<std::endl;
+        std::cout << "Original point is " << original_point << "The remaining point is" << remaining_point << "Lost point is" << original_point - remaining_point << std::endl;
 }
 
 int main(int argc, char **argv)
