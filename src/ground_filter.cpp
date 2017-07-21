@@ -330,7 +330,7 @@ void GroundFilter::groundSeparate(const pcl::PointCloud<velodyne_pointcloud::Poi
 				double centroid = 0;
 				int cluster_index[vertical_res];
 				int cluster_index_size = 0;
-				publishPoint(msg, unknown_index, unknown_index_size, ground_points);
+				//publishPoint(msg, unknown_index, unknown_index_size, ground_points);
 				for (int m = unknown_index_size - 1; m >= 0; m--)
 				{
 					double x0 = msg->points[unknown_index[m]].x;
@@ -345,25 +345,20 @@ void GroundFilter::groundSeparate(const pcl::PointCloud<velodyne_pointcloud::Poi
 						cluster_index[cluster_index_size] = unknown_index[m];
 						cluster_index_size++;
 						centroid = r0;
-						if (m == 0)
-						{
-							if(cluster_index_size > 1)
-							{
-							//	publishPoint(msg, cluster_index, cluster_index_size, vertical_points);
-							} else {
-							//	publishPoint(msg, cluster_index, cluster_index_size, ground_points);
-							}
-						}
 					} else {
 						if(cluster_index_size > 1)
 						{
-						//	publishPoint(msg, cluster_index	, cluster_index_size, vertical_points);
+							publishPoint(msg, cluster_index	, cluster_index_size, vertical_points);
 						} else {
-						//	publishPoint(msg, cluster_index, cluster_index_size, ground_points);
+							publishPoint(msg, cluster_index, cluster_index_size, ground_points);
 						}
+						
+						cluster_index[cluster_index_size] = unknown_index[m];
+						cluster_index_size++;
+						centroid = r0;
 						//One more line right here
 						//cluster_index_size = 0;
-						if (m == 0)
+			/*			if (m == 0)
 						{
 							//cluster_index_size = 1;
 							//publishPoint(msg, unknown_index, cluster_index_size, ground_points);
@@ -372,8 +367,17 @@ void GroundFilter::groundSeparate(const pcl::PointCloud<velodyne_pointcloud::Poi
 							point.z = msg->points[unknown_index[m]].z;
 							point.intensity = msg->points[unknown_index[m]].intensity;
 							point.ring = msg->points[unknown_index[m]].ring;
-						//	ground_points.push_back(point);
-							//point_class[point_index[m]] = GROUND;
+							//ground_points.push_back(point);
+							//point_class[point_index[m]] = GROUND;						
+						}*/
+					}
+					if (m == 0)
+					{
+						if(cluster_index_size > 1)
+						{
+							publishPoint(msg, cluster_index, cluster_index_size, vertical_points);
+						} else {
+							publishPoint(msg, cluster_index, cluster_index_size, ground_points);
 						}
 					}
 				}
@@ -406,7 +410,9 @@ void GroundFilter::velodyneCallback(const pcl::PointCloud<velodyne_pointcloud::P
 	t2 = boost::chrono::high_resolution_clock::now();
         elap_time = (boost::chrono::duration_cast<boost::chrono::nanoseconds>(t2-t1));
         //std::cout << "Computational time for each frame is " << elap_time <<std::endl;
-        std::cout << "Original point is " << original_point << " The remaining point is " << remaining_point << " Lost point is " << original_point - remaining_point << " Point after transform " << point_after_tf<< std::endl;
+        std::cout << "Original point is " << original_point << " The remaining point is " << remaining_point << 
+	" Lost point is " << original_point - remaining_point << " Point after transform " << point_after_tf<<
+	" Real missing point is " << point_after_tf - remaining_point  << std::endl;
 }
 
 int main(int argc, char **argv)
