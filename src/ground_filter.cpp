@@ -56,6 +56,7 @@ private:
 
 	int		original_point;
 	int		remaining_point;
+	int		point_after_tf;
 
 	boost::chrono::high_resolution_clock::time_point t1;
 	boost::chrono::high_resolution_clock::time_point t2;
@@ -172,7 +173,9 @@ void GroundFilter::groundSeparate(const pcl::PointCloud<velodyne_pointcloud::Poi
 
 	original_point = msg->points.size();
 	remaining_point = 0;
-	
+	point_after_tf = 0;	
+
+	//This conversion has some losses
 	//Convert coordinate of each point from Cartesian to Spherical (XYZ -> DepthMap)
         for (int i = 0; i < msg->points.size(); i++)
         {
@@ -180,7 +183,7 @@ void GroundFilter::groundSeparate(const pcl::PointCloud<velodyne_pointcloud::Poi
                 if (u < 0) u = 360 + u;  
                 int column = horizontal_res - (int)((double)horizontal_res * u / 360.0) - 1;   
                 int row = vertical_res - 1 - msg->points[i].ring;
-                index_map.at<int>(row, column) = i;
+		index_map.at<int>(row, column) = i;
         }
 
 	//Iterate through each bearing angle (each horizontal angle)
@@ -204,6 +207,7 @@ void GroundFilter::groundSeparate(const pcl::PointCloud<velodyne_pointcloud::Poi
 			//It will not be processed again
                         if (index_map.at<int>(j,i) > -1 && point_class[j] == UNKNOWN)
                         {
+				point_after_tf++;
 				double x0 = msg->points[index_map.at<int>(j, i)].x;
 				double y0 = msg->points[index_map.at<int>(j, i)].y;
 				double z0 = msg->points[index_map.at<int>(j, i)].z;
@@ -402,7 +406,7 @@ void GroundFilter::velodyneCallback(const pcl::PointCloud<velodyne_pointcloud::P
 	t2 = boost::chrono::high_resolution_clock::now();
         elap_time = (boost::chrono::duration_cast<boost::chrono::nanoseconds>(t2-t1));
         //std::cout << "Computational time for each frame is " << elap_time <<std::endl;
-        std::cout << "Original point is " << original_point << "The remaining point is" << remaining_point << "Lost point is" << original_point - remaining_point << std::endl;
+        std::cout << "Original point is " << original_point << " The remaining point is " << remaining_point << " Lost point is " << original_point - remaining_point << " Point after transform " << point_after_tf<< std::endl;
 }
 
 int main(int argc, char **argv)
