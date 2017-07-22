@@ -92,7 +92,7 @@ GroundFilter::GroundFilter() : n("~")
 
 	//These parameters have been tested to be the optimal values for this algorithm
 	//Shouldn't have to be changed for normal use
-	n.param("point_distance", point_distance, 0.05);
+	//n.param("point_distance", point_distance, 0.05);
         n.param("min_point", min_point, 4);
 	n.param("clipping_thres", clipping_thres, 1.72);
 	n.param("gap_thres", gap_thres, 0.15);
@@ -116,10 +116,54 @@ GroundFilter::GroundFilter() : n("~")
 //This loop calculate the expected spaced between consecutive rings
 void GroundFilter::initRadiusArray(double radius[], int model)
 {
-	for (int i = 0; i < model; i++)
-	{
-		radius[i] = i*0.004 + 0.00005;
-	}
+        if (model == 32)
+        {
+                double start_angle = 92.0/3;
+                double angle_res = 4.0/3;
+                for (int i = 0; i < model; i++)
+                {
+                        if (i == 0)
+                        {
+                                radius[i] = 999999;
+                        } else {
+                                double theta = start_angle - i*angle_res;
+                                theta = theta*M_PI/180.0;
+                                radius[i] = sensor_height*(1.0/tan(theta) - 1.0/tan(theta + angle_res*M_PI/180.0)); 
+                        }
+                        std::cout << "Index " << i << " radius " << radius[i] << std::endl;
+                }
+        } else {
+                for (int i = 0; i < model; i++)
+                {
+                        if (i < 32)
+                        {
+                                double start_angle = 73.0/3;
+                                double angle_res = 1.0/2;
+                                if (i == 0)
+                                {
+                                        radius[i] = 999999;
+                                } else {
+                                        double theta = start_angle - i*angle_res;
+                                        theta = theta*M_PI/180.0;
+                                        radius[i] = sensor_height*(1.0/tan(theta) - 1.0/tan(theta + angle_res*M_PI/180.0)); 
+                                }
+                        } else {
+                                double start_angle = 25.0/3;
+                                double angle_res = 1.0/3;
+                                if (i == 32)
+                                {
+                                        double theta = start_angle;
+                                        theta = theta*M_PI/180.0;
+                                        radius[i] = sensor_height*(1.0/tan(theta) - 1.0/tan(theta + 0.5*M_PI/180.0)); 
+                                } else {
+                                        double theta = start_angle - (i-32)*angle_res;
+                                        theta = theta*M_PI/180.0;
+                                        radius[i] = sensor_height*(1.0/tan(theta) - 1.0/tan(theta + angle_res*M_PI/180.0)); 
+                                }
+                        }
+                        std::cout << "Index " << i << " radius " << radius[i] << std::endl;
+                }
+        }       
 }
 
 //Create an enum array to store the current status of each point in the same bearing angle
@@ -337,8 +381,15 @@ void GroundFilter::groundSeparate(const pcl::PointCloud<velodyne_pointcloud::Poi
 					double y0 = msg->points[unknown_index[m]].y;
 					double r0 = sqrt(x0*x0 + y0*y0);
 					double r_diff = fabs(r0 - centroid);
-					//point_distance = 0.2;
-					point_distance = optimal_radius[centroid_ring];
+					//point_distance = 0.007*centroid_ring + 0.0001;
+					if (centroid_ring <= 15)
+					{ 
+						point_distance = 0.2 * optimal_radius[centroid_ring];
+					} else if (centroid_ring <= 40) {
+						point_distance = 0.7 * optimal_radius[centroid_ring];
+					} else {
+						point_distance = 0.7 * optimal_radius[40];
+					}
 					if ((r_diff < point_distance) || cluster_index_size == 0)
 					{
 						cluster_index[cluster_index_size] = unknown_index[m];
@@ -356,6 +407,7 @@ void GroundFilter::groundSeparate(const pcl::PointCloud<velodyne_pointcloud::Poi
 						cluster_index[cluster_index_size] = unknown_index[m];
 						cluster_index_size++;
 						centroid = r0;
+						centroid_ring = msg->points[unknown_index[m]].ring;
 					}
 					if (m == 0)
 					{

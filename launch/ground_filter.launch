@@ -2,12 +2,12 @@
         <arg name="point_topic" default="/velodyne_points" />
         <arg name="remove_floor" default="true" />
         <arg name="sensor_model" default="64" />
-        <arg name="sensor_height" default="1.72" />
-        <arg name="max_slope" default="2.0" />
+        <arg name="sensor_height" default="1.80" />
+        <arg name="max_slope" default="15.0" />
         <arg name="point_distance" default="0.04" />
-        <arg name="clipping_thres" default="1.72" />
-        <arg name="min_point" default="4" />
-        <arg name="gap_thres" default="0.1" />
+        <arg name="clipping_thres" default="5.00" />
+        <arg name="min_point" default="2" />
+        <arg name="gap_thres" default="0.05" />
 
         <!-- rosrun lidar_tracker ground_filter -->
         <!-- node pkg="ground_filter" type="ground_filter_node" name="ground_filter" launch-prefix="xterm -e run gdbserver localhost:10000" -->
