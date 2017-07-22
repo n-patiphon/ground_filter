@@ -53,7 +53,7 @@ private:
 	Label 		class_label[64];
 	double 		optimal_radius[64];
 
-
+	//These will be deleted
 	int		original_point;
 	int		remaining_point;
 	int		point_after_tf;
@@ -118,7 +118,7 @@ void GroundFilter::initRadiusArray(double radius[], int model)
 {
 	for (int i = 0; i < model; i++)
 	{
-		radius[i] = i*0.007 + 0.01;
+		radius[i] = i*0.004 + 0.00005;
 	}
 }
 
@@ -328,23 +328,23 @@ void GroundFilter::groundSeparate(const pcl::PointCloud<velodyne_pointcloud::Poi
 				//Check if the radial distance between two consecutive points is less than 
 				//point_distance threshold, if so classify them as vertical
 				double centroid = 0;
+				int centroid_ring = 0;
 				int cluster_index[vertical_res];
 				int cluster_index_size = 0;
-				//publishPoint(msg, unknown_index, unknown_index_size, ground_points);
 				for (int m = unknown_index_size - 1; m >= 0; m--)
 				{
 					double x0 = msg->points[unknown_index[m]].x;
 					double y0 = msg->points[unknown_index[m]].y;
 					double r0 = sqrt(x0*x0 + y0*y0);
 					double r_diff = fabs(r0 - centroid);
-					//point_distance = 0.01;
-					point_distance = optimal_radius[msg->points[unknown_index[m]].ring];
-					//point_distance = msg->points[unknown_index[m]].ring*0.007 + 0.01;
+					//point_distance = 0.2;
+					point_distance = optimal_radius[centroid_ring];
 					if ((r_diff < point_distance) || cluster_index_size == 0)
 					{
 						cluster_index[cluster_index_size] = unknown_index[m];
 						cluster_index_size++;
 						centroid = r0;
+						centroid_ring = msg->points[unknown_index[m]].ring;
 					} else {
 						if(cluster_index_size > 1)
 						{
@@ -356,20 +356,6 @@ void GroundFilter::groundSeparate(const pcl::PointCloud<velodyne_pointcloud::Poi
 						cluster_index[cluster_index_size] = unknown_index[m];
 						cluster_index_size++;
 						centroid = r0;
-						//One more line right here
-						//cluster_index_size = 0;
-			/*			if (m == 0)
-						{
-							//cluster_index_size = 1;
-							//publishPoint(msg, unknown_index, cluster_index_size, ground_points);
-							point.x = msg->points[unknown_index[m]].x;
-							point.y = msg->points[unknown_index[m]].y;
-							point.z = msg->points[unknown_index[m]].z;
-							point.intensity = msg->points[unknown_index[m]].intensity;
-							point.ring = msg->points[unknown_index[m]].ring;
-							//ground_points.push_back(point);
-							//point_class[point_index[m]] = GROUND;						
-						}*/
 					}
 					if (m == 0)
 					{
