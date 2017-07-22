@@ -40,11 +40,13 @@ private:
 	int 		sensor_model;
 	double 		sensor_height;
 	double 		max_slope;
-	int 		min_point;
-	double 		clipping_thres;
 	double 		gap_thres;
-	double 		point_distance;
         bool            floor_removal; 
+	double 		radius_coeff_close;
+	double		radius_coeff_far;
+
+	double 		point_distance;
+	int 		min_point;
 
 	int 		vertical_res;
 	int 		horizontal_res;
@@ -86,16 +88,16 @@ GroundFilter::GroundFilter() : n("~")
 	//Can be selected between 16, 32 and 64 (Have never tested on 16 though)
         n.param("sensor_model", sensor_model, 64);
 	//This is the height of Velodyne measured from center of Velodyne to ground
-        n.param("sensor_height", sensor_height, 1.72);
+        n.param("sensor_height", sensor_height, 1.80);
 	//Maximum allowable slope i.e., any surface steeper than this angle[deg] will not be removed
-        n.param("max_slope", max_slope, 3.0);
+        n.param("max_slope", max_slope, 15.0);
 
 	//These parameters have been tested to be the optimal values for this algorithm
 	//Shouldn't have to be changed for normal use
-	//n.param("point_distance", point_distance, 0.05);
-        n.param("min_point", min_point, 4);
-	n.param("clipping_thres", clipping_thres, 1.72);
+        n.param("min_point", min_point, 2);
 	n.param("gap_thres", gap_thres, 0.15);
+	n.param("radius_coeff_close", radius_coeff_close, 0.2);
+	n.param("radius_coeff_far", radius_coeff_far, 0.7);
 
 	//Number of laser rays in vertical direction
 	vertical_res 	= 64;
@@ -112,6 +114,7 @@ GroundFilter::GroundFilter() : n("~")
 	sub = n.subscribe(point_topic, 10, &GroundFilter::velodyneCallback, this);
         vertical_points_pub = n.advertise<sensor_msgs::PointCloud2>("/points_lanes", 10);
         ground_points_pub = n.advertise<sensor_msgs::PointCloud2>("/points_ground", 10);
+
 }
 //This loop calculate the expected spaced between consecutive rings
 void GroundFilter::initRadiusArray(double radius[], int model)
@@ -130,6 +133,16 @@ void GroundFilter::initRadiusArray(double radius[], int model)
                                 theta = theta*M_PI/180.0;
                                 radius[i] = sensor_height*(1.0/tan(theta) - 1.0/tan(theta + angle_res*M_PI/180.0)); 
                         }
+
+			if (i <= 12)
+			{
+				radius[i] = radius_coeff_close*radius[i];
+			} else if (i <= 20) {
+				radius[i] = radius_coeff_far*radius[i];
+			} else {	
+				radius[i] = radius[20];
+			}
+			
                         std::cout << "Index " << i << " radius " << radius[i] << std::endl;
                 }
         } else {
@@ -161,6 +174,16 @@ void GroundFilter::initRadiusArray(double radius[], int model)
                                         radius[i] = sensor_height*(1.0/tan(theta) - 1.0/tan(theta + angle_res*M_PI/180.0)); 
                                 }
                         }
+			
+			if (i <= 15) 
+			{
+				radius[i] = radius_coeff_close*radius[i];
+			} else if (i <= 40) {
+				radius[i] = radius_coeff_far*radius[i];
+			} else {
+				radius[i] = radius[40];
+			}
+
                         std::cout << "Index " << i << " radius " << radius[i] << std::endl;
                 }
         }       
@@ -261,7 +284,7 @@ void GroundFilter::groundSeparate(const pcl::PointCloud<velodyne_pointcloud::Poi
 				double pair_angle = z_diff/r_diff;
 				//Check if the angle between the current and the previous point is less than a defined maximum_slope
 				//If the angle is less than maximum_slope, add the current point to "Candidate group"
-				if (((pair_angle > 0 && pair_angle < limiting_ratio) && z_diff < gap_thres && z0 < clipping_thres - sensor_height) || point_index_size == 0)
+				if (((pair_angle > 0 && pair_angle < limiting_ratio) && z_diff < gap_thres) || point_index_size == 0)
 				{
 					r_ref = r0;
 					z_ref = z0;
@@ -293,24 +316,13 @@ void GroundFilter::groundSeparate(const pcl::PointCloud<velodyne_pointcloud::Poi
 						for (int m = 0; m < point_index_size; m++)
 						{
 							int index = index_map.at<int>(point_index[m],i);
+							point.x = msg->points[index].x;
+							point.y = msg->points[index].y;
 							point.z = msg->points[index].z;
-							//Publish every points that are higher than clipping_threshold as vertical points
-							if (point.z > clipping_thres - sensor_height)
-							{
-								point.x = msg->points[index].x;
-								point.y = msg->points[index].y;
-								point.intensity = msg->points[index].intensity;
-								point.ring = msg->points[index].ring;
-								vertical_points.push_back(point);
-								point_class[point_index[m]] = VERTICAL;
-
-
-								remaining_point++;
-							//Mark the remaining points as Unknown points for further calculation
-							} else {
-								unknown_index[unknown_index_size] = index;
-								unknown_index_size++;
-							}
+							point.intensity = msg->points[index].intensity;
+							point.ring = msg->points[index].ring;
+							unknown_index[unknown_index_size] = index;
+							unknown_index_size++;
 						}
 						point_index_size = 0;
 					}
@@ -349,21 +361,13 @@ void GroundFilter::groundSeparate(const pcl::PointCloud<velodyne_pointcloud::Poi
 						for (int m = 0; m < point_index_size; m++)
 						{
 							int index = index_map.at<int>(point_index[m],i);
+							point.x = msg->points[index].x;
+							point.y = msg->points[index].y;
 							point.z = msg->points[index].z;
-							if (point.z > clipping_thres - sensor_height)
-							{
-								point.x = msg->points[index].x;
-								point.y = msg->points[index].y;
-								point.intensity = msg->points[index].intensity;
-								point.ring = msg->points[index].ring;
-								vertical_points.push_back(point);
-								point_class[point_index[m]] = VERTICAL;
-
-								remaining_point++;
-							} else {
-								unknown_index[unknown_index_size] = index;
-								unknown_index_size++;
-							}
+							point.intensity = msg->points[index].intensity;
+							point.ring = msg->points[index].ring;
+							unknown_index[unknown_index_size] = index;
+							unknown_index_size++;
 						}
 						point_index_size = 0;
 					}
@@ -381,15 +385,15 @@ void GroundFilter::groundSeparate(const pcl::PointCloud<velodyne_pointcloud::Poi
 					double y0 = msg->points[unknown_index[m]].y;
 					double r0 = sqrt(x0*x0 + y0*y0);
 					double r_diff = fabs(r0 - centroid);
-					//point_distance = 0.007*centroid_ring + 0.0001;
-					if (centroid_ring <= 15)
+					/*if (centroid_ring <= 15)
 					{ 
 						point_distance = 0.2 * optimal_radius[centroid_ring];
 					} else if (centroid_ring <= 40) {
 						point_distance = 0.7 * optimal_radius[centroid_ring];
 					} else {
 						point_distance = 0.7 * optimal_radius[40];
-					}
+					}*/
+					point_distance = optimal_radius[centroid_ring];
 					if ((r_diff < point_distance) || cluster_index_size == 0)
 					{
 						cluster_index[cluster_index_size] = unknown_index[m];

@@ -1,12 +1,12 @@
 <launch>
         <arg name="point_topic" default="/velodyne_points" />
         <arg name="remove_floor" default="true" />
-        <arg name="sensor_model" default="64" />
-        <arg name="sensor_height" default="1.80" />
-        <arg name="gap_thres" default="0.1" />
+        <arg name="sensor_model" default="32" />
+        <arg name="sensor_height" default="1.20" />
+        <arg name="gap_thres" default="0.2" />
 	
         <arg name="max_slope" default="15.0" />
-        <arg name="radius_coeff_close" default="0.2" />
+	<arg name="radius_coeff_close" default="0.2" />
         <arg name="radius_coeff_far" default="0.7" />
 
         <!-- rosrun lidar_tracker ground_filter -->
@@ -17,7 +17,7 @@
                 <param name="sensor_height" value="$(arg sensor_height)" />
                 <param name="max_slope" value="$(arg max_slope)" />
                 <param name="gap_thres" value="$(arg gap_thres)" />
-                <param name="radius_coeff_close" value="$(arg radius_coeff_close)" />
+	        <param name="radius_coeff_close" value="$(arg radius_coeff_close)" />
                 <param name="radius_coeff_far" value="$(arg radius_coeff_far)" />
         </node>
 
