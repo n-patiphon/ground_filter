@@ -142,8 +142,6 @@ void GroundFilter::initRadiusArray(double radius[], int model)
 			} else {	
 				radius[i] = radius[20];
 			}
-			
-                        std::cout << "Index " << i << " radius " << radius[i] << std::endl;
                 }
         } else {
                 for (int i = 0; i < model; i++)
@@ -183,8 +181,6 @@ void GroundFilter::initRadiusArray(double radius[], int model)
 			} else {
 				radius[i] = radius[40];
 			}
-
-                        std::cout << "Index " << i << " radius " << radius[i] << std::endl;
                 }
         }       
 }
@@ -385,14 +381,6 @@ void GroundFilter::groundSeparate(const pcl::PointCloud<velodyne_pointcloud::Poi
 					double y0 = msg->points[unknown_index[m]].y;
 					double r0 = sqrt(x0*x0 + y0*y0);
 					double r_diff = fabs(r0 - centroid);
-					/*if (centroid_ring <= 15)
-					{ 
-						point_distance = 0.2 * optimal_radius[centroid_ring];
-					} else if (centroid_ring <= 40) {
-						point_distance = 0.7 * optimal_radius[centroid_ring];
-					} else {
-						point_distance = 0.7 * optimal_radius[40];
-					}*/
 					point_distance = optimal_radius[centroid_ring];
 					if ((r_diff < point_distance) || cluster_index_size == 0)
 					{
@@ -451,10 +439,10 @@ void GroundFilter::velodyneCallback(const pcl::PointCloud<velodyne_pointcloud::P
 
 	t2 = boost::chrono::high_resolution_clock::now();
         elap_time = (boost::chrono::duration_cast<boost::chrono::nanoseconds>(t2-t1));
-        //std::cout << "Computational time for each frame is " << elap_time <<std::endl;
-        std::cout << "Original point is " << original_point << " The remaining point is " << remaining_point << 
-	" Lost point is " << original_point - remaining_point << " Point after transform " << point_after_tf<<
-	" Real missing point is " << point_after_tf - remaining_point  << std::endl;
+        std::cout << "Computational time for each frame is " << elap_time << " for total " << remaining_point << " points" << std::endl;
+        //std::cout << "Original point is " << original_point << " The remaining point is " << remaining_point << 
+	//" Lost point is " << original_point - remaining_point << " Point after transform " << point_after_tf<<
+	//" Real missing point is " << point_after_tf - remaining_point  << std::endl;
 }
 
 int main(int argc, char **argv)
