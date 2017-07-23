@@ -15,17 +15,17 @@ catkin_package(
 ###########
 ## Build ##
 ###########
+find_package(PCL 1.7)
 
 include_directories(
   ${catkin_INCLUDE_DIRS}
-  ${Boost_INCLUDE_DIR}
 )
 
 SET(CMAKE_CXX_FLAGS "-std=c++11 -O2 -g -Wall ${CMAKE_CXX_FLAGS}")
 
-link_directories(${PCL_LIBRARY_DIRS} ${Boost_LIBRARY_DIR})
+link_directories(${PCL_LIBRARY_DIRS})
 
 
 #Ground Filter
 add_executable(ground_filter nodes/ground_filter/ground_filter.cpp)
-target_link_libraries(ground_filter ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${Boost_LIBRARIES})
+target_link_libraries(ground_filter ${catkin_LIBRARIES} ${PCL_LIBRARIES})
