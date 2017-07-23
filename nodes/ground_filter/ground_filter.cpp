@@ -38,7 +38,7 @@ private:
 	boost::chrono::high_resolution_clock::time_point t1;
         boost::chrono::high_resolution_clock::time_point t2;
         boost::chrono::nanoseconds elap_time;
-	int remainin_point;	
+	int remaining_point;	
 
 	void VelodyneCallback(const sensor_msgs::PointCloud2::Ptr& in_sensor_cloud_ptr);
 	void RemoveFloor(const pcl::PointCloud<pcl::PointXYZ>::Ptr in_cloud_ptr,
