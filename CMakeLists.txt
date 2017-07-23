@@ -1,28 +1,28 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(ground_filter)
+project(points_preprocessor)
 
 find_package(catkin REQUIRED COMPONENTS
-  cv_bridge
   roscpp
+  std_msgs
+  pcl_ros
 )
-
-find_package(PCL 1.7 REQUIRED)
-include_directories(${PCL_INCLUDE_DIRS})
-link_libraries(${PCL_LIBRARIES})
-add_definitions(${PCL_DEFINITIONS})
 
 catkin_package(
-   CATKIN_DEPENDS cv_bridge sensor_msgs
+  CATKIN_DEPENDS sensor_msgs
 )
+
+###########
+## Build ##
+###########
 
 include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-add_executable(${PROJECT_NAME}_node src/ground_filter.cpp)
+SET(CMAKE_CXX_FLAGS "-std=c++11 -O2 -g -Wall ${CMAKE_CXX_FLAGS}")
 
-target_link_libraries(${PROJECT_NAME}_node
-   ${catkin_LIBRARIES}
-   ${PCL_LIBRARIES}
-)
+link_directories(${PCL_LIBRARY_DIRS})
 
+#Ground Filter
+add_executable(ground_filter nodes/ground_filter/ground_filter.cpp)
+target_link_libraries(ground_filter ${catkin_LIBRARIES} ${PCL_LIBRARIES})

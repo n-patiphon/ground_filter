@@ -1,18 +1,16 @@
 <!-- Launch file for Ground Filter -->
 <launch>
-        <arg name="point_topic" default="/velodyne_points" />
-        <arg name="sensor_model" default="64" />
-        <arg name="sensor_height" default="1.72" />
-        <arg name="max_slope" default="20.0" />
-        <arg name="remove_floor" default="true" />
-
-        <!-- rosrun lidar_tracker ground_filter -->
-        <node pkg="ground_filter" type="ground_filter_node" name="ground_filter">
-                <param name="point_topic" value="$(arg point_topic)" />
-                <param name="sensor_model" value="$(arg sensor_model)" />
-                <param name="sensor_height" value="$(arg sensor_height)" />
-                <param name="max_slope" value="$(arg max_slope)" />
-                <param name="remove_floor" value="$(arg remove_floor)" />
-        </node>
+	<arg name="subscribe_topic" default="/velodyne_points" />
+	<arg name="remove_ground" default="true" />
+	<arg name="points_distance" default="0.2" />
+	<arg name="angle_threshold" default="0.35" />
+	
+	<!-- rosrun lidar_tracker ground_filter -->
+	<node pkg="points_preprocessor" type="ground_filter" name="ground_filter">
+		<param name="subscribe_topic" value="$(arg subscribe_topic)" />
+		<param name="remove_ground" value="$(arg remove_ground)" />
+		<param name="points_distance" value="$(arg points_distance)" />
+		<param name="angle_threshold" value="$(arg angle_threshold)" />
+	</node>
 
 </launch>
