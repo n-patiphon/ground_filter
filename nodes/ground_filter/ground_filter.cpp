@@ -12,6 +12,9 @@
 #include <sensor_msgs/PointCloud.h>
 #include <sensor_msgs/PointCloud2.h>
 
+#include <boost/lexical_cast.hpp> //U
+#include <boost/chrono.hpp> //U
+#include <iostream> //U
 
 class GroundFilter
 {
@@ -32,6 +35,10 @@ private:
 	double 			points_distance_;
 	double 			angle_threshold_;
 
+	boost::chrono::high_resolution_clock::time_point t1;
+        boost::chrono::high_resolution_clock::time_point t2;
+        boost::chrono::nanoseconds elap_time;
+	int remainin_point;	
 
 	void VelodyneCallback(const sensor_msgs::PointCloud2::Ptr& in_sensor_cloud_ptr);
 	void RemoveFloor(const pcl::PointCloud<pcl::PointXYZ>::Ptr in_cloud_ptr,
@@ -97,13 +104,16 @@ void GroundFilter::RemoveFloor(const pcl::PointCloud<pcl::PointXYZ>::Ptr in_clou
 
 void GroundFilter::VelodyneCallback(const sensor_msgs::PointCloud2::Ptr& in_sensor_cloud_ptr)
 {
+	t1 = boost::chrono::high_resolution_clock::now();
+	
 	pcl::PointCloud<pcl::PointXYZ>::Ptr current_sensor_cloud_ptr (new pcl::PointCloud<pcl::PointXYZ>);
 	pcl::PointCloud<pcl::PointXYZ>::Ptr ground_cloud_ptr (new pcl::PointCloud<pcl::PointXYZ>);
 	pcl::PointCloud<pcl::PointXYZ>::Ptr lanes_cloud_ptr (new pcl::PointCloud<pcl::PointXYZ>);
 	pcl::PointCloud<pcl::PointXYZ>::Ptr output_cloud_ptr (new pcl::PointCloud<pcl::PointXYZ>);
 
 	pcl::fromROSMsg(*in_sensor_cloud_ptr, *current_sensor_cloud_ptr);
-
+	
+	remaining_point = current_sensor_cloud_ptr->points.size();
 
 	RemoveFloor(current_sensor_cloud_ptr, lanes_cloud_ptr, ground_cloud_ptr, points_distance_, angle_threshold_);
 
@@ -123,6 +133,11 @@ void GroundFilter::VelodyneCallback(const sensor_msgs::PointCloud2::Ptr& in_sens
 
 	cloud_output_msg.header=in_sensor_cloud_ptr->header;
 	cloud_lanes_pub_.publish(cloud_output_msg);
+	
+	t2 = boost::chrono::high_resolution_clock::now();
+        elap_time = (boost::chrono::duration_cast<boost::chrono::nanoseconds>(t2-t1));
+        std::cout << "Computational time for each frame is " << elap_time << " for total " << remaining_point << " points" << std::endl;
+
 }
 
 int main(int argc, char **argv)
