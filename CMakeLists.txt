@@ -18,11 +18,13 @@ catkin_package(
 
 include_directories(
   ${catkin_INCLUDE_DIRS}
+  ${Boost_INCLUDE_DIR}
 )
 
 SET(CMAKE_CXX_FLAGS "-std=c++11 -O2 -g -Wall ${CMAKE_CXX_FLAGS}")
 
-link_directories(${PCL_LIBRARY_DIRS})
+link_directories(${PCL_LIBRARY_DIRS} ${Boost_LIBRARY_DIR})
+
 
 #Ground Filter
 add_executable(ground_filter nodes/ground_filter/ground_filter.cpp)
