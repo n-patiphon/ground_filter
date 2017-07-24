@@ -37,15 +37,15 @@ Visualization Manager:
       Axis: Z
       Channel Name: intensity
       Class: rviz/PointCloud2
-      Color: 255; 255; 255
-      Color Transformer: Intensity
+      Color: 255; 0; 0
+      Color Transformer: FlatColor
       Decay Time: 0
       Enabled: true
       Invert Rainbow: false
       Max Color: 255; 255; 255
       Max Intensity: 255
       Min Color: 0; 0; 0
-      Min Intensity: 5
+      Min Intensity: 4
       Name: PointCloud2
       Position Transformer: XYZ
       Queue Size: 10
@@ -67,7 +67,7 @@ Visualization Manager:
       Axis: Z
       Channel Name: intensity
       Class: rviz/PointCloud2
-      Color: 255; 255; 255
+      Color: 85; 255; 0
       Color Transformer: FlatColor
       Decay Time: 0
       Enabled: true
@@ -142,22 +142,22 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/XYOrbit
-      Distance: 24.7596
+      Distance: 24.1401
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.06
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0
-        Y: 0
-        Z: 0
+        X: -13.5849
+        Y: 0.637899
+        Z: -7.08375e-07
       Name: Current View
       Near Clip Distance: 0.01
-      Pitch: 0.295398
+      Pitch: 0.385398
       Target Frame: <Fixed Frame>
       Value: XYOrbit (rviz)
-      Yaw: 6.05858
+      Yaw: 3.18358
     Saved: ~
 Window Geometry:
   Displays:
