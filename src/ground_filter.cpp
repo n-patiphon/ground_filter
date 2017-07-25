@@ -231,7 +231,7 @@ void GroundFilter::groundSeparate(const pcl::PointCloud<velodyne_pointcloud::Poi
 
         velodyne_pointcloud::PointXYZIR point;
 	
-        horizontal_res = int(msg->points.size()*1.1 / vertical_res);
+        horizontal_res = int(msg->points.size()*1.8 / vertical_res);
         initDepthMap(horizontal_res);
 
 	original_point = msg->points.size();
