@@ -19,6 +19,8 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
+SET(CMAKE_CXX_FLAGS "-std=c++11 -O2 -g -Wall ${CMAKE_CXX_FLAGS}")
+
 add_executable(${PROJECT_NAME}_node src/ground_filter.cpp)
 
 target_link_libraries(${PROJECT_NAME}_node

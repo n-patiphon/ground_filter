@@ -3,11 +3,13 @@
         <arg name="remove_floor" default="true" />
         <arg name="sensor_model" default="64" />
         <arg name="sensor_height" default="1.80" />
-        <arg name="gap_thres" default="0.1" />
+        <arg name="gap_thres" default="0.15" />
 	
-        <arg name="max_slope" default="15.0" />
+        <arg name="max_slope" default="20.0" />
         <arg name="radius_coeff_close" default="0.2" />
         <arg name="radius_coeff_far" default="0.7" />
+	<arg name="min_point" default="2" />
+	<arg name="clipping_thres" default="5.00" />
 
         <!-- rosrun lidar_tracker ground_filter -->
         <node pkg="ground_filter" type="ground_filter_node" name="ground_filter"> 
@@ -19,6 +21,8 @@
                 <param name="gap_thres" value="$(arg gap_thres)" />
                 <param name="radius_coeff_close" value="$(arg radius_coeff_close)" />
                 <param name="radius_coeff_far" value="$(arg radius_coeff_far)" />
+                <param name="min_point" value="$(arg min_point)" />
+                <param name="clipping_thres" value="$(arg clipping_thres)" />
         </node>
 
 </launch>
